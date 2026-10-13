@@ -248,8 +248,7 @@ Proyecto en desarrollo/curso, orientado a prácticas de:
 
 ## Autor
 
+Edward Rojas
 Proyecto desarrollado para practicar usos prácticos de Flask, despliegue y mantenimiento de microapps.
 
----
 
-Si quieres, puedo dejarte la versión final del README en formato más profesional, con badges, screenshots o una versión más compacta para GitHub.
