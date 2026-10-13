@@ -3,6 +3,11 @@ from apps.converter import converter_bp
 from apps.security import security_bp
 from apps.webhook import webhook_bp
 from apps.monitor import monitor_bp
+from apps.formatter import formatter_bp
+from apps.crypto import crypto_bp
+from apps.text_analyzer import text_bp
+from apps.network_tools import jwt_bp
+from apps.unit_converter import units_bp
 
 app = Flask(__name__)
 
@@ -11,9 +16,14 @@ app.register_blueprint(converter_bp)
 app.register_blueprint(security_bp)
 app.register_blueprint(webhook_bp)
 app.register_blueprint(monitor_bp)
+app.register_blueprint(formatter_bp)
+app.register_blueprint(crypto_bp)
+app.register_blueprint(text_bp)
+app.register_blueprint(jwt_bp)
+app.register_blueprint(units_bp)
 
 DASHBOARD_HTML = """
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -43,7 +53,7 @@ DASHBOARD_HTML = """
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
-            <!-- Targeta 1: Generador de Contraseñas -->
+            <!-- Tarjeta 1: Generador de Contraseñas -->
             <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-4">
@@ -67,7 +77,7 @@ DASHBOARD_HTML = """
                 </div>
             </div>
 
-            <!-- Targeta 2: Generador de QR -->
+            <!-- Tarjeta 2: Generador de QR -->
             <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-4">
@@ -92,7 +102,7 @@ DASHBOARD_HTML = """
                 </div>
             </div>
 
-            <!-- Targeta 3: Monitor de APIs -->
+            <!-- Tarjeta 3: Monitor de APIs -->
             <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-4">
@@ -112,6 +122,114 @@ DASHBOARD_HTML = """
                         Consultar Estado
                     </button>
                     <pre id="monitor-output" class="text-xs font-mono bg-slate-950 p-3 rounded text-emerald-300 overflow-x-auto min-h-[40px] flex items-center">Esperando prueba...</pre>
+                </div>
+            </div>
+
+            <!-- Tarjeta 4: JSON a CSV -->
+            <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-indigo-500/10 text-indigo-400 rounded-md">Datos</span>
+                        <span class="text-xs font-mono text-slate-400">POST</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-file-csv mr-2 text-indigo-400"></i>JSON a CSV</h3>
+                    <p class="text-slate-400 text-sm mb-4">Convierte una lista de objetos JSON a un archivo CSV descargable.</p>
+                    
+                    <div class="mb-4">
+                        <textarea id="json-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-emerald-400 font-mono">[{"nombre":"Edward","rol":"Dev"}]</textarea>
+                    </div>
+                </div>
+
+                <div>
+                    <button onclick="testConverter()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded-lg transition text-sm mb-3">
+                        Convertir y Descargar CSV
+                    </button>
+                    <pre id="converter-output" class="text-xs font-mono bg-slate-950 p-2 rounded text-slate-400 min-h-[30px]">Estado: Listo</pre>
+                </div>
+            </div>
+
+            <!-- Tarjeta 5: Formateador JSON -->
+            <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-md">Dev Tools</span>
+                        <span class="text-xs font-mono text-slate-400">POST</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-code mr-2 text-amber-400"></i>Formateador JSON</h3>
+                    <p class="text-slate-400 text-sm mb-4">Organiza y embellece estructuras JSON desordenadas.</p>
+                    <textarea id="fmt-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-amber-300 font-mono mb-4" placeholder='{"a":1,"b":2}'></textarea>
+                </div>
+                <div>
+                    <button onclick="testFormatter()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-medium py-2 rounded-lg transition text-sm mb-3">Formatear</button>
+                    <pre id="fmt-output" class="text-xs font-mono bg-slate-950 p-2 rounded text-slate-400 min-h-[40px] overflow-x-auto">Estado: Esperando entrada...</pre>
+                </div>
+            </div>
+
+            <!-- Tarjeta 6: Generador de Hashes -->
+            <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-rose-500/10 text-rose-400 rounded-md">Cripto</span>
+                        <span class="text-xs font-mono text-slate-400">POST</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-key mr-2 text-rose-400"></i>Generador Hashes</h3>
+                    <p class="text-slate-400 text-sm mb-4">Calcula firmas MD5, SHA-256 y SHA-512 de un texto.</p>
+                    <input type="text" id="hash-input" value="portal_microapps" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white mb-4">
+                </div>
+                <div>
+                    <button onclick="testCrypto()" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-medium py-2 rounded-lg transition text-sm mb-3">Generar Hashes</button>
+                    <pre id="hash-output" class="text-xs font-mono bg-slate-950 p-2 rounded text-slate-400 min-h-[40px] overflow-x-auto">Estado: Esperando entrada...</pre>
+                </div>
+            </div>
+
+            <!-- Tarjeta 7: Analizador de Texto -->
+            <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-teal-500/10 text-teal-400 rounded-md">Texto</span>
+                        <span class="text-xs font-mono text-slate-400">POST</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-font mr-2 text-teal-400"></i>Analizador Texto</h3>
+                    <p class="text-slate-400 text-sm mb-4">Cuenta palabras, caracteres y tiempo de lectura.</p>
+                    <textarea id="text-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white mb-4" placeholder="Escribe tu texto aquí..."></textarea>
+                </div>
+                <div>
+                    <button onclick="testTextAnalyzer()" class="w-full bg-teal-600 hover:bg-teal-500 text-white font-medium py-2 rounded-lg transition text-sm mb-3">Analizar</button>
+                    <pre id="text-output" class="text-xs font-mono bg-slate-950 p-2 rounded text-slate-400 min-h-[40px] overflow-x-auto">Estado: Esperando entrada...</pre>
+                </div>
+            </div>
+
+            <!-- Tarjeta 8: Decodificador JWT -->
+            <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-purple-500/10 text-purple-400 rounded-md">Auth</span>
+                        <span class="text-xs font-mono text-slate-400">POST</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-shield-halved mr-2 text-purple-400"></i>Decodificador JWT</h3>
+                    <p class="text-slate-400 text-sm mb-4">Extrae el Header y Payload de un token JWT.</p>
+                    <input type="text" id="jwt-input" placeholder="eyJhbGciOiJIUzI1Ni..." class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white mb-4">
+                </div>
+                <div>
+                    <button onclick="testJwt()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-medium py-2 rounded-lg transition text-sm mb-3">Decodificar</button>
+                    <pre id="jwt-output" class="text-xs font-mono bg-slate-950 p-2 rounded text-slate-400 min-h-[40px] overflow-x-auto">Estado: Esperando entrada...</pre>
+                </div>
+            </div>
+
+            <!-- Tarjeta 9: Conversor de Unidades -->
+            <div class="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-sky-500/10 text-sky-400 rounded-md">Datos</span>
+                        <span class="text-xs font-mono text-slate-400">GET</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-hard-drive mr-2 text-sky-400"></i>Conversor Bytes</h3>
+                    <p class="text-slate-400 text-sm mb-4">Convierte Bytes a KB, MB y GB en tiempo real.</p>
+                    <input type="number" id="units-input" value="1048576" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-xs text-white mb-4">
+                </div>
+                <div>
+                    <button onclick="testUnits()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-medium py-2 rounded-lg transition text-sm mb-3">Convertir</button>
+                    <pre id="units-output" class="text-xs font-mono bg-slate-950 p-2 rounded text-slate-400 min-h-[40px] overflow-x-auto">Estado: Esperando entrada...</pre>
                 </div>
             </div>
 
@@ -159,6 +277,92 @@ DASHBOARD_HTML = """
 
             const data = await res.json();
             out.innerText = JSON.stringify(data, null, 2);
+        }
+
+        async function testConverter() {
+            const rawJson = document.getElementById('json-input').value;
+            const out = document.getElementById('converter-output');
+            try {
+                const parsed = JSON.parse(rawJson);
+                const res = await fetch('/api/converter/json-to-csv', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(parsed)
+                });
+                
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'converted.csv';
+                    a.click();
+                    out.innerText = 'CSV descargado con éxito.';
+                } else {
+                    const err = await res.json();
+                    out.innerText = err.error;
+                }
+            } catch(e) {
+                out.innerText = 'JSON inválido';
+            }
+        }
+
+        async function testFormatter() {
+            const raw = document.getElementById('fmt-input').value;
+            const out = document.getElementById('fmt-output');
+            try {
+                const res = await fetch('/api/formatter/format-json', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: raw
+                });
+                const data = await res.json();
+                out.innerText = data.formatted || data.error;
+            } catch(e) { out.innerText = 'JSON no válido'; }
+        }
+
+        async function testCrypto() {
+            const text = document.getElementById('hash-input').value;
+            const out = document.getElementById('hash-output');
+            const res = await fetch('/api/crypto/hash', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ text })
+            });
+            const data = await res.json();
+            out.innerText = JSON.stringify(data.hashes, null, 2);
+        }
+
+        async function testTextAnalyzer() {
+            const text = document.getElementById('text-input').value;
+            const out = document.getElementById('text-output');
+            const res = await fetch('/api/text/analyze', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ text })
+            });
+            const data = await res.json();
+            out.innerText = JSON.stringify(data.metrics, null, 2);
+        }
+
+        async function testJwt() {
+            const token = document.getElementById('jwt-input').value;
+            const out = document.getElementById('jwt-output');
+            const res = await fetch('/api/jwt/decode', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ token })
+            });
+            const data = await res.json();
+            out.innerText = JSON.stringify(data, null, 2);
+        }
+
+        async function testUnits() {
+            const bytes = document.getElementById('units-input').value;
+            const out = document.getElementById('units-output');
+            const res = await fetch(`/api/units/bytes?bytes=${bytes}`);
+            const data = await res.json();
+            out.innerText = JSON.stringify(data.conversions, null, 2);
         }
     </script>
 </body>
