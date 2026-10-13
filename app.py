@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string
+from flask import Flask, render_template
 from apps.converter import converter_bp
 from apps.security import security_bp
 from apps.webhook import webhook_bp
