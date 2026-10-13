@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hub de Microaplicaciones Flask</title>
-    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+    <!-- Tailwind CSS CDN oficial -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Font CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .toast-enter { transform: translateY(100%); opacity: 0; }
         .toast-show { transform: translateY(0); opacity: 1; transition: all 0.3s ease; }
@@ -106,7 +108,7 @@
                     <p class="text-slate-400 text-sm mb-4">Ingresa un texto o URL para compilar la imagen QR.</p>
                     
                     <div class="mb-4">
-                        <input type="text" id="qr-text" placeholder="[https://ejemplo.com](https://ejemplo.com)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                        <input type="text" id="qr-text" placeholder="https://ejemplo.com" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-amber-500">
                     </div>
                 </div>
 
@@ -131,7 +133,7 @@
                     <p class="text-slate-400 text-sm mb-4">Verifica el tiempo de respuesta de una URL.</p>
                     
                     <div class="mb-4">
-                        <input type="url" id="monitor-url" value="[https://httpbin.org/get](https://httpbin.org/get)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+                        <input type="url" id="monitor-url" value="https://httpbin.org/get" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-emerald-500">
                     </div>
                 </div>
 
@@ -296,7 +298,6 @@
 
     <!-- Script de Funcionalidades UX & Peticiones -->
     <script>
-        // --- 1. Utilidades UX ---
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             const toastMsg = document.getElementById('toast-msg');
@@ -372,7 +373,6 @@
             });
         }
 
-        // --- 2. Peticiones a Microapps ---
         async function testPassword() {
             const length = document.getElementById('pass-length').value;
             setLoading('btn-pass', true, 'Generar Password');
