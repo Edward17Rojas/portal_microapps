@@ -24,7 +24,7 @@ app.register_blueprint(units_bp)
 
 @app.route('/')
 def dashboard():
-    return render_template_(index.html)
+    return render_template(index.html)
 
 if __name__ == '__main__':
     app.run(debug=True)
