@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hub de Microaplicaciones Flask</title>
+    <script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
+    <style>
+        .toast-enter { transform: translateY(100%); opacity: 0; }
+        .toast-show { transform: translateY(0); opacity: 1; transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+    
+    <!-- Toast de Notificaciones -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 hidden bg-slate-800 border border-indigo-500/50 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 toast-enter">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toast-msg" class="text-sm font-medium">Mensaje aquí</span>
+    </div>
+
+    <!-- Header -->
+    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-cubes text-indigo-500 text-2xl"></i>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">Portal MicroApps</h1>
+                    <p class="text-xs text-slate-400">Entorno modular en Flask</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-mono flex items-center">
+                    <i class="fa-solid fa-circle text-[8px] mr-2 animate-pulse"></i> Sistema Online
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        
+        <!-- Sección de Filtros y Búsqueda -->
+        <section class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-950/40 p-4 rounded-2xl border border-slate-800">
+            <div>
+                <h2 class="text-2xl font-extrabold text-white">Consola Interactiva</h2>
+                <p class="text-slate-400 text-xs mt-1">Herramientas modulares para desarrollo y gestión de datos.</p>
+            </div>
+
+            <!-- Buscador + Filtros por Categoría -->
+            <div class="flex flex-col sm:flex-row items-center gap-3">
+                <div class="relative w-full sm:w-64">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                    <input type="text" id="search-input" onkeyup="filterCards()" placeholder="Buscar microapp..." class="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                
+                <div class="flex items-center gap-1 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+                    <button onclick="filterCategory('all')" class="category-btn active px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white transition">Todas</button>
+                    <button onclick="filterCategory('Seguridad')" class="category-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400 hover:bg-slate-700 transition">Seguridad</button>
+                    <button onclick="filterCategory('Datos')" class="category-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400 hover:bg-slate-700 transition">Datos</button>
+                    <button onclick="filterCategory('Dev')" class="category-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400 hover:bg-slate-700 transition">Dev</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Grid de Microapps -->
+        <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <!-- Tarjeta 1: Generador de Contraseñas -->
+            <div class="card bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between hover:border-slate-600 transition" data-category="Seguridad" data-title="generador de passwords contrasenas">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-md">Seguridad</span>
+                        <span class="text-xs font-mono text-slate-400">GET</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-key mr-2 text-amber-400"></i>Generador de Passwords</h3>
+                    <p class="text-slate-400 text-sm mb-4">Genera claves de alta entropía ajustando la longitud.</p>
+                    
+                    <div class="mb-4">
+                        <label class="text-xs text-slate-400 block mb-1">Longitud (8-64):</label>
+                        <input type="number" id="pass-length" value="16" min="8" max="64" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+
+                <div>
+                    <button onclick="testPassword()" id="btn-pass" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-medium py-2 rounded-lg transition text-sm mb-3 flex items-center justify-center">
+                        <span>Generar Password</span>
+                    </button>
+                    <div class="relative">
+                        <pre id="pass-output" class="text-xs font-mono bg-slate-950 p-3 pr-10 rounded-lg text-amber-300 overflow-x-auto min-h-[42px] flex items-center">Resultado aquí...</pre>
+                        <button onclick="copyToClipboard('pass-output')" title="Copiar resultado" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 text-xs">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta 2: Generador de QR -->
+            <div class="card bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between hover:border-slate-600 transition" data-category="Seguridad" data-title="generador de codigo qr">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-md">Seguridad</span>
+                        <span class="text-xs font-mono text-slate-400">POST</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-qrcode mr-2 text-amber-400"></i>Generador de Código QR</h3>
+                    <p class="text-slate-400 text-sm mb-4">Ingresa un texto o URL para compilar la imagen QR.</p>
+                    
+                    <div class="mb-4">
+                        <input type="text" id="qr-text" placeholder="[https://ejemplo.com](https://ejemplo.com)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+
+                <div>
+                    <button onclick="testQR()" id="btn-qr" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-medium py-2 rounded-lg transition text-sm mb-3 flex items-center justify-center">
+                        <span>Generar QR</span>
+                    </button>
+                    <div id="qr-output" class="bg-slate-950 rounded-lg p-2 flex justify-center items-center min-h-[120px]">
+                        <span class="text-xs text-slate-500">Imagen QR se mostrará aquí</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta 3: Monitor de APIs -->
+            <div class="card bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between hover:border-slate-600 transition" data-category="Dev" data-title="monitor de apis ping status">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-md">Dev</span>
+                        <span class="text-xs font-mono text-slate-400">POST</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-satellite-dish mr-2 text-emerald-400"></i>Monitor de APIs</h3>
+                    <p class="text-slate-400 text-sm mb-4">Verifica el tiempo de respuesta de una URL.</p>
+                    
+                    <div class="mb-4">
+                        <input type="url" id="monitor-url" value="[https://httpbin.org/get](https://httpbin.org/get)" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div>
+                    <button onclick="testMonitor()" id="btn-monitor" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 rounded-lg transition text-sm mb-3 flex items-center justify-center">
+                        <span>Consultar Estado</span>
+                    </button>
+                    <div class="relative">
+                        <pre id="monitor-output" class="text-xs font-mono bg-slate-950 p-3 pr-10 rounded-lg text-emerald-300 overflow-x-auto min-h-[42px] flex items-center">Esperando prueba...</pre>
+                        <button onclick="copyToClipboard('monitor-output')" title="Copiar resultado" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 text-xs">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta 4: JSON a CSV -->
+            <div class="card bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between hover:border-slate-600 transition" data-category="Datos" data-title="json a csv convertidor datos">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-indigo-500/10 text-indigo-400 rounded-md">Datos</span>
+                        <span class="text-xs font-mono text-slate-400">POST</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-file-csv mr-2 text-indigo-400"></i>JSON a CSV</h3>
+                    <p class="text-slate-400 text-sm mb-4">Convierte una lista de objetos JSON a un archivo CSV descargable.</p>
+                    
+                    <div class="mb-4">
+                        <textarea id="json-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-emerald-400 font-mono focus:outline-none focus:border-indigo-500">[{"nombre":"Edward","rol":"Dev"}]</textarea>
+                    </div>
+                </div>
+
+                <div>
+                    <button onclick="testConverter()" id="btn-converter" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 rounded-lg transition text-sm mb-3 flex items-center justify-center">
+                        <span>Convertir y Descargar CSV</span>
+                    </button>
+                    <pre id="converter-output" class="text-xs font-mono bg-slate-950 p-2 rounded-lg text-slate-400 min-h-[30px]">Estado: Listo</pre>
+                </div>
+            </div>
+
+            <!-- Tarjeta 5: Formateador JSON -->
+            <div class="card bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between hover:border-slate-600 transition" data-category="Dev" data-title="formateador json pretty print">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-md">Dev</span>
+                        <span class="text-xs font-mono text-slate-400">POST</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-code mr-2 text-amber-400"></i>Formateador JSON</h3>
+                    <p class="text-slate-400 text-sm mb-4">Organiza y embellece estructuras JSON desordenadas.</p>
+                    <textarea id="fmt-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-amber-300 font-mono mb-4 focus:outline-none focus:border-amber-500" placeholder='{"a":1,"b":2}'></textarea>
+                </div>
+                <div>
+                    <button onclick="testFormatter()" id="btn-fmt" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-medium py-2 rounded-lg transition text-sm mb-3 flex items-center justify-center">
+                        <span>Formatear</span>
+                    </button>
+                    <div class="relative">
+                        <pre id="fmt-output" class="text-xs font-mono bg-slate-950 p-3 pr-10 rounded-lg text-slate-400 min-h-[42px] overflow-x-auto">Estado: Esperando entrada...</pre>
+                        <button onclick="copyToClipboard('fmt-output')" title="Copiar resultado" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 text-xs">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta 6: Generador de Hashes -->
+            <div class="card bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between hover:border-slate-600 transition" data-category="Seguridad" data-title="generador hashes md5 sha256 crypto">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-rose-500/10 text-rose-400 rounded-md">Seguridad</span>
+                        <span class="text-xs font-mono text-slate-400">POST</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-key mr-2 text-rose-400"></i>Generador Hashes</h3>
+                    <p class="text-slate-400 text-sm mb-4">Calcula firmas MD5, SHA-256 y SHA-512 de un texto.</p>
+                    <input type="text" id="hash-input" value="portal_microapps" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white mb-4 focus:outline-none focus:border-rose-500">
+                </div>
+                <div>
+                    <button onclick="testCrypto()" id="btn-crypto" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-medium py-2 rounded-lg transition text-sm mb-3 flex items-center justify-center">
+                        <span>Generar Hashes</span>
+                    </button>
+                    <div class="relative">
+                        <pre id="hash-output" class="text-xs font-mono bg-slate-950 p-3 pr-10 rounded-lg text-slate-400 min-h-[42px] overflow-x-auto">Estado: Esperando entrada...</pre>
+                        <button onclick="copyToClipboard('hash-output')" title="Copiar resultado" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 text-xs">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta 7: Analizador de Texto -->
+            <div class="card bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between hover:border-slate-600 transition" data-category="Datos" data-title="analizador texto palabras contador">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-teal-500/10 text-teal-400 rounded-md">Datos</span>
+                        <span class="text-xs font-mono text-slate-400">POST</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-font mr-2 text-teal-400"></i>Analizador Texto</h3>
+                    <p class="text-slate-400 text-sm mb-4">Cuenta palabras, caracteres y tiempo de lectura.</p>
+                    <textarea id="text-input" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white mb-4 focus:outline-none focus:border-teal-500" placeholder="Escribe tu texto aquí..."></textarea>
+                </div>
+                <div>
+                    <button onclick="testTextAnalyzer()" id="btn-text" class="w-full bg-teal-600 hover:bg-teal-500 text-white font-medium py-2 rounded-lg transition text-sm mb-3 flex items-center justify-center">
+                        <span>Analizar</span>
+                    </button>
+                    <div class="relative">
+                        <pre id="text-output" class="text-xs font-mono bg-slate-950 p-3 pr-10 rounded-lg text-slate-400 min-h-[42px] overflow-x-auto">Estado: Esperando entrada...</pre>
+                        <button onclick="copyToClipboard('text-output')" title="Copiar resultado" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 text-xs">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta 8: Decodificador JWT -->
+            <div class="card bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between hover:border-slate-600 transition" data-category="Seguridad" data-title="decodificador jwt token auth">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-purple-500/10 text-purple-400 rounded-md">Seguridad</span>
+                        <span class="text-xs font-mono text-slate-400">POST</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-shield-halved mr-2 text-purple-400"></i>Decodificador JWT</h3>
+                    <p class="text-slate-400 text-sm mb-4">Extrae el Header y Payload de un token JWT.</p>
+                    <input type="text" id="jwt-input" placeholder="eyJhbGciOiJIUzI1Ni..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white mb-4 focus:outline-none focus:border-purple-500">
+                </div>
+                <div>
+                    <button onclick="testJwt()" id="btn-jwt" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-medium py-2 rounded-lg transition text-sm mb-3 flex items-center justify-center">
+                        <span>Decodificar</span>
+                    </button>
+                    <div class="relative">
+                        <pre id="jwt-output" class="text-xs font-mono bg-slate-950 p-3 pr-10 rounded-lg text-slate-400 min-h-[42px] overflow-x-auto">Estado: Esperando entrada...</pre>
+                        <button onclick="copyToClipboard('jwt-output')" title="Copiar resultado" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 text-xs">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta 9: Conversor de Unidades -->
+            <div class="card bg-slate-800/50 border border-slate-700/50 rounded-xl p-6 flex flex-col justify-between hover:border-slate-600 transition" data-category="Datos" data-title="conversor bytes mb gb unidades">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-sky-500/10 text-sky-400 rounded-md">Datos</span>
+                        <span class="text-xs font-mono text-slate-400">GET</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2"><i class="fa-solid fa-hard-drive mr-2 text-sky-400"></i>Conversor Bytes</h3>
+                    <p class="text-slate-400 text-sm mb-4">Convierte Bytes a KB, MB y GB en tiempo real.</p>
+                    <input type="number" id="units-input" value="1048576" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white mb-4 focus:outline-none focus:border-sky-500">
+                </div>
+                <div>
+                    <button onclick="testUnits()" id="btn-units" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-medium py-2 rounded-lg transition text-sm mb-3 flex items-center justify-center">
+                        <span>Convertir</span>
+                    </button>
+                    <div class="relative">
+                        <pre id="units-output" class="text-xs font-mono bg-slate-950 p-3 pr-10 rounded-lg text-slate-400 min-h-[42px] overflow-x-auto">Estado: Esperando entrada...</pre>
+                        <button onclick="copyToClipboard('units-output')" title="Copiar resultado" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1 text-xs">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Script de Funcionalidades UX & Peticiones -->
+    <script>
+        // --- 1. Utilidades UX ---
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-msg');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = message;
+            if (type === 'error') {
+                toastIcon.className = 'fa-solid fa-circle-exclamation text-rose-400';
+            } else {
+                toastIcon.className = 'fa-solid fa-circle-check text-emerald-400';
+            }
+
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('toast-show'), 10);
+
+            setTimeout(() => {
+                toast.classList.remove('toast-show');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            if (!text || text.startsWith('Estado:') || text === 'Resultado aquí...') {
+                return showToast('No hay datos para copiar', 'error');
+            }
+            navigator.clipboard.writeText(text);
+            showToast('¡Copiado al portapapeles!');
+        }
+
+        function setLoading(btnId, isLoading, defaultText) {
+            const btn = document.getElementById(btnId);
+            if (isLoading) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-circle-notch animate-spin mr-2"></i> Procesando...`;
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = `<span>${defaultText}</span>`;
+            }
+        }
+
+        function filterCards() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const title = card.getAttribute('data-title').toLowerCase();
+                if (title.includes(query)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        function filterCategory(category) {
+            const buttons = document.querySelectorAll('.category-btn');
+            buttons.forEach(btn => {
+                if (btn.innerText.toLowerCase() === category.toLowerCase() || (category === 'all' && btn.innerText === 'Todas')) {
+                    btn.className = 'category-btn active px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white transition';
+                } else {
+                    btn.className = 'category-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 text-slate-400 hover:bg-slate-700 transition';
+                }
+            });
+
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const cardCat = card.getAttribute('data-category');
+                if (category === 'all' || cardCat.toLowerCase() === category.toLowerCase()) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        // --- 2. Peticiones a Microapps ---
+        async function testPassword() {
+            const length = document.getElementById('pass-length').value;
+            setLoading('btn-pass', true, 'Generar Password');
+            try {
+                const res = await fetch(`/api/security/generate-password?length=${length}`);
+                const data = await res.json();
+                document.getElementById('pass-output').innerText = data.password || data.error;
+                showToast('Contraseña generada con éxito');
+            } catch (e) { showToast('Error al conectar con la API', 'error'); }
+            setLoading('btn-pass', false, 'Generar Password');
+        }
+
+        async function testQR() {
+            const text = document.getElementById('qr-text').value;
+            if (!text) return showToast('Ingresa un texto para el QR', 'error');
+            
+            setLoading('btn-qr', true, 'Generar QR');
+            try {
+                const res = await fetch('/api/security/generate-qr', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text})
+                });
+
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    document.getElementById('qr-output').innerHTML = `<img src="${url}" class="h-28 w-28 rounded">`;
+                    showToast('Código QR generado');
+                } else {
+                    const err = await res.json();
+                    document.getElementById('qr-output').innerText = err.error;
+                }
+            } catch(e) { showToast('Error al generar el QR', 'error'); }
+            setLoading('btn-qr', false, 'Generar QR');
+        }
+
+        async function testMonitor() {
+            const url = document.getElementById('monitor-url').value;
+            const out = document.getElementById('monitor-output');
+            setLoading('btn-monitor', true, 'Consultar Estado');
+
+            try {
+                const res = await fetch('/api/monitor/check', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url})
+                });
+                const data = await res.json();
+                out.innerText = JSON.stringify(data, null, 2);
+                showToast('Consulta finalizada');
+            } catch(e) { showToast('Error al consultar el monitor', 'error'); }
+            setLoading('btn-monitor', false, 'Consultar Estado');
+        }
+
+        async function testConverter() {
+            const rawJson = document.getElementById('json-input').value;
+            const out = document.getElementById('converter-output');
+            setLoading('btn-converter', true, 'Convertir y Descargar CSV');
+            try {
+                const parsed = JSON.parse(rawJson);
+                const res = await fetch('/api/converter/json-to-csv', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(parsed)
+                });
+                
+                if (res.ok) {
+                    const blob = await res.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'converted.csv';
+                    a.click();
+                    out.innerText = 'CSV descargado con éxito.';
+                    showToast('Archivo CSV generado');
+                } else {
+                    const err = await res.json();
+                    out.innerText = err.error;
+                }
+            } catch(e) {
+                out.innerText = 'JSON inválido';
+                showToast('JSON no válido', 'error');
+            }
+            setLoading('btn-converter', false, 'Convertir y Descargar CSV');
+        }
+
+        async function testFormatter() {
+            const raw = document.getElementById('fmt-input').value;
+            const out = document.getElementById('fmt-output');
+            setLoading('btn-fmt', true, 'Formatear');
+            try {
+                const res = await fetch('/api/formatter/format-json', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: raw
+                });
+                const data = await res.json();
+                out.innerText = data.formatted || data.error;
+                showToast('JSON formateado');
+            } catch(e) { 
+                out.innerText = 'JSON no válido';
+                showToast('Estructura JSON inválida', 'error');
+            }
+            setLoading('btn-fmt', false, 'Formatear');
+        }
+
+        async function testCrypto() {
+            const text = document.getElementById('hash-input').value;
+            const out = document.getElementById('hash-output');
+            setLoading('btn-crypto', true, 'Generar Hashes');
+            try {
+                const res = await fetch('/api/crypto/hash', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ text })
+                });
+                const data = await res.json();
+                out.innerText = JSON.stringify(data.hashes, null, 2);
+                showToast('Hashes calculados');
+            } catch(e) { showToast('Error al procesar los hashes', 'error'); }
+            setLoading('btn-crypto', false, 'Generar Hashes');
+        }
+
+        async function testTextAnalyzer() {
+            const text = document.getElementById('text-input').value;
+            const out = document.getElementById('text-output');
+            setLoading('btn-text', true, 'Analizar');
+            try {
+                const res = await fetch('/api/text/analyze', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ text })
+                });
+                const data = await res.json();
+                out.innerText = JSON.stringify(data.metrics, null, 2);
+                showToast('Análisis de texto completado');
+            } catch(e) { showToast('Error al analizar texto', 'error'); }
+            setLoading('btn-text', false, 'Analizar');
+        }
+
+        async function testJwt() {
+            const token = document.getElementById('jwt-input').value;
+            const out = document.getElementById('jwt-output');
+            setLoading('btn-jwt', true, 'Decodificar');
+            try {
+                const res = await fetch('/api/jwt/decode', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ token })
+                });
+                const data = await res.json();
+                out.innerText = JSON.stringify(data, null, 2);
+                showToast('Token JWT procesado');
+            } catch(e) { showToast('Error al decodificar JWT', 'error'); }
+            setLoading('btn-jwt', false, 'Decodificar');
+        }
+
+        async function testUnits() {
+            const bytes = document.getElementById('units-input').value;
+            const out = document.getElementById('units-output');
+            setLoading('btn-units', true, 'Convertir');
+            try {
+                const res = await fetch(`/api/units/bytes?bytes=${bytes}`);
+                const data = await res.json();
+                out.innerText = JSON.stringify(data.conversions, null, 2);
+                showToast('Conversión calculada');
+            } catch(e) { showToast('Error en conversión de unidades', 'error'); }
+            setLoading('btn-units', false, 'Convertir');
+        }
+    </script>
+</body>
+</html>
